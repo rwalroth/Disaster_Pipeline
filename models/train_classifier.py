@@ -15,7 +15,7 @@ nltk.download(['punkt', 'wordnet'])
 
 
 def load_data(database_filepath):
-    engine = create_engine('sqlite:///InsertDatabaseName.db')
+    engine = create_engine('sqlite:///' + database_filepath)
     df = pd.read_sql_table('InsertTableName', engine)
     X = df['message']
     Y = df.drop(['message','original','genre', 'id'], axis=1)
