@@ -1,24 +1,70 @@
 import sys
+import pandas as pd
+import pickle
+from sqlalchemy import create_engine
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.metrics import classification_report
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+nltk.download(['punkt', 'wordnet'])
 
 
 def load_data(database_filepath):
-    pass
+    engine = create_engine('sqlite:///InsertDatabaseName.db')
+    df = pd.read_sql_table('InsertTableName', engine)
+    X = df['message']
+    Y = df.drop(['message','original','genre', 'id'], axis=1)
+    category_names = Y.columns
+    return X, Y, category_names
 
 
 def tokenize(text):
-    pass
+    tokens = word_tokenize(text)
+    lemmatizer = WordNetLemmatizer()
+
+    clean_tokens = []
+    for tok in tokens:
+        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
+        clean_tokens.append(clean_tok)
+
+    return clean_tokens
 
 
 def build_model():
-    pass
+    pipeline = Pipeline([
+        ('vect', TfidfVectorizer(tokenizer=tokenize)),
+        ('clf', MultiOutputClassifier(RandomForestClassifier()))
+    ])
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
+
+    parameters = {
+        'clf__estimator__n_estimators': [10, 20, 30, 40],
+        'clf__estimator__max_depth': [2, 4, 8, 16]
+    }
+    
+    model = GridSearchCV(pipeline, param_grid=parameters, verbose=2)
+
+    model.fit(X_train, y_train)
+    
+    return model
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    y_pred = pd.DataFrame(model.predict(X_test), columns=category_names)
+    for name in category_names:
+        print(name)
+        print(classification_report(y_test[name], y_pred[name]))
 
 
 def save_model(model, model_filepath):
-    pass
+    with open(model_filepath, 'wb') as f:
+        pickle.dump(model, f)
 
 
 def main():
