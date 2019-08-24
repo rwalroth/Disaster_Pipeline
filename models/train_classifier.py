@@ -74,6 +74,8 @@ def main():
         model = build_model()
         
         print('Training model...')
+        print(X_train[:5])
+        print(type(Y_train['related'][0]))
         model.fit(X_train, Y_train)
         
         print('Evaluating model...')
