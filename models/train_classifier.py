@@ -40,8 +40,6 @@ def build_model():
         ('vect', TfidfVectorizer(tokenizer=tokenize)),
         ('clf', MultiOutputClassifier(RandomForestClassifier()))
     ])
-    
-    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
 
     parameters = {
         'clf__estimator__n_estimators': [10, 20, 30, 40],
@@ -49,8 +47,6 @@ def build_model():
     }
     
     model = GridSearchCV(pipeline, param_grid=parameters, verbose=2)
-
-    model.fit(X_train, y_train)
     
     return model
 
