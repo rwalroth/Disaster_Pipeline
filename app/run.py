@@ -56,25 +56,27 @@ def index():
         a = '0.' + ''.join(list(reversed([str(x) for x in Y.loc[i]])))
         pca_df['cat'][i] = float(a)
     pca_df['cat'] = (pca_df['cat'] - pca_df['cat'].min())/(pca_df['cat'].max() - pca_df['cat'].min())
-    
+    totals = Y.sum()
+    cats = list(totals.index)
+    counts = list(totals)
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
         {
             'data': [
                 Bar(
-                    x=genre_names,
-                    y=genre_counts
+                    x=cats,
+                    y=counts
                 )
             ],
 
             'layout': {
-                'title': 'Distribution of Message Genres',
+                'title': 'Distribution of Message Categories',
                 'yaxis': {
                     'title': "Count"
                 },
                 'xaxis': {
-                    'title': "Genre"
+                    'title': "Message Category"
                 }
             }
         },
