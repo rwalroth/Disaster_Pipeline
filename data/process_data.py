@@ -35,6 +35,7 @@ def clean_data(df):
     
         # convert column from string to numeric
         categories[column] = pd.to_numeric(categories[column])
+        categories[column] = [0 if x == 0 else 1 for x in categories[column]]
     
     # drop the original categories column from `df`
     df = df.drop('categories', axis=1)
