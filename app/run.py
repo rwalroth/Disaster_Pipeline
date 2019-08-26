@@ -8,8 +8,12 @@ from nltk.tokenize import word_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
+from plotly.graph_objs import Scatter
 from sklearn.externals import joblib
+from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sqlalchemy import create_engine
+import numpy as np
 
 
 app = Flask(__name__)
@@ -43,6 +47,16 @@ def index():
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     
+    word_vectors = TfidfVectorizer(tokenizer=tokenize).fit_transform(df['message'])
+    pca = TruncatedSVD().fit_transform(word_vectors)
+    pca_df = pd.DataFrame(pca, columns=['LSA 1', 'LSA 2'])
+    pca_df['cat'] = np.zeros_like(pca[:,0])
+    Y = df.drop(['message','original','genre', 'id'], axis=1)
+    for i in Y.index:
+        a = '0.' + ''.join(list(reversed([str(x) for x in Y.loc[i]])))
+        pca_df['cat'][i] = float(a)
+    pca_df['cat'] = (pca_df['cat'] - pca_df['cat'].min())/(pca_df['cat'].max() - pca_df['cat'].min())
+    
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
@@ -61,6 +75,30 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        {
+            'data': [
+                Scatter(
+                    x=pca[:,0],
+                    y=pca[:,1],
+                    mode='markers',
+                    marker = dict(
+                        color=pca_df['cat'],
+                        colorscale='Viridis',
+                        opacity=0.1
+                    )
+                )
+            ],
+
+            'layout': {
+                'title': 'LSA Analysis of Messages',
+                'yaxis': {
+                    'title': "First LSA component"
+                },
+                'xaxis': {
+                    'title': "Second LSA component"
                 }
             }
         }
