@@ -83,7 +83,7 @@ def index():
                 Scatter(
                     x=pca[:,0],
                     y=pca[:,1],
-                    mode='markers',
+                    mode='markers+text',
                     marker = dict(
                         color=pca_df['cat'],
                         colorscale='Viridis',
@@ -93,12 +93,12 @@ def index():
             ],
 
             'layout': {
-                'title': 'LSA Analysis of Messages',
+                'title': 'LSA Analysis of Messages, color coded by category',
                 'yaxis': {
                     'title': "First LSA component"
                 },
                 'xaxis': {
-                    'title': "Second LSA component"
+                    'title': "Second LSA component<br><br>Colors correspond to combinations of categories for each message, the number of combinations<br> of categories is represented in the spread of colors but not conducive to a simple legend"
                 }
             }
         }
