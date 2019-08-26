@@ -15,8 +15,11 @@ nltk.download(['punkt', 'wordnet'])
 
 
 def load_data(database_filepath):
+    # load in data from sql db
     engine = create_engine('sqlite:///' + database_filepath)
     df = pd.read_sql_table('InsertTableName', engine)
+    
+    # split into messages and target
     X = df['message']
     Y = df.drop(['message','original','genre', 'id'], axis=1)
     category_names = Y.columns
@@ -24,6 +27,7 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    # use nltk for word tokenizing and lemmatizing
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
 
@@ -36,11 +40,14 @@ def tokenize(text):
 
 
 def build_model():
+    # first step vectorizes the messages, then uses RF to classify
     pipeline = Pipeline([
         ('vect', TfidfVectorizer(tokenizer=tokenize)),
         ('clf', MultiOutputClassifier(RandomForestClassifier()))
     ])
-
+    
+    # two parameters are optimized, the depth of the trees and the number of trees
+    # chosen because they strongly influence the generalizability of a RF classifier
     parameters = {
         'clf__estimator__n_estimators': [10, 20, 30, 40],
         'clf__estimator__max_depth': [2, 4, 8, 16]
