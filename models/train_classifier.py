@@ -43,7 +43,7 @@ def build_model():
     # first step vectorizes the messages, then uses RF to classify
     pipeline = Pipeline([
         ('vect', TfidfVectorizer(tokenizer=tokenize)),
-        ('clf', MultiOutputClassifier(RandomForestClassifier()))
+        ('clf', MultiOutputClassifier(RandomForestClassifier(class_weight='balanced', random_state=42)))
     ])
     
     # two parameters are optimized, the depth of the trees and the number of trees
