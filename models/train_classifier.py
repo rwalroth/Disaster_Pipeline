@@ -55,7 +55,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
     y_pred = pd.DataFrame(model.predict(X_test), columns=category_names)
     for name in category_names:
         print(name)
-        print(classification_report(y_test[name], y_pred[name]))
+        print(classification_report(Y_test[name], y_pred[name]))
 
 
 def save_model(model, model_filepath):
@@ -74,8 +74,6 @@ def main():
         model = build_model()
         
         print('Training model...')
-        print(X_train[:5])
-        print(type(Y_train['related'][0]))
         model.fit(X_train, Y_train)
         
         print('Evaluating model...')
